@@ -21,15 +21,18 @@ class PostsTableViewCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
  
-
     override func awakeFromNib() {
         super.awakeFromNib()
-  
+        initCellView()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-      
+        super.setSelected(selected, animated: animated)      
     }
+    
+    func initCellView() {
+        UIDesign().setLabel(lable: titleLabel)
+        UIDesign().setLabel(lable: descriptionLabel)
+    }
+
  }

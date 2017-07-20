@@ -42,16 +42,17 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
             comfrimRegisterButton.addTarget(self, action: #selector(didTappedRegisterButton), for: .touchUpInside)
         }
     }
+    
     //to select image as false
     var isImageSelected : Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //        setupSpinner()
+        initRegisterView()
+        self.navigationItem.title = "Register New Account"
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
         self.view.endEditing(true)
     }
     
@@ -66,11 +67,9 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
         present(pickerController, animated: true, completion: nil)
-        
     }
     
     func didTappedRegisterButton(_ sender: Any){
-        
         
         guard
             let username = usernameTextField.text,
@@ -147,21 +146,16 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
                 print("Username is \(username)")
                 
                 self.toHomeVC()
-                
-                
             })
         }
     }
+    
     func toHomeVC()  {
         let loginStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         let homeVC = loginStoryboard.instantiateViewController(withIdentifier: "NavigationController2")
         
         self.present(homeVC, animated: true, completion: nil)
-        
-        
     }
-    
-    
     
     func warningAlert(warningMessage: String){
         let alertController = UIAlertController(title: "Error", message: warningMessage, preferredStyle: .alert)
@@ -169,8 +163,12 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
         alertController.addAction(ok)
         
         present(alertController, animated: true, completion: nil)
-        
-        
+    }
+    
+    func initRegisterView() {
+        UIDesign().setGradientBackgroundColor(view: self.view, firstColor: UIColor.red, secondColor: UIColor.cyan)
+        UIDesign().setButtonDesign(button: comfrimRegisterButton, color: UIColor.purple)
+        UIDesign().setButtonDesign(button: selectPhotoButton, color: UIColor.purple)
     }
 }
 
@@ -191,8 +189,5 @@ extension RegisterVC : UIImagePickerControllerDelegate, UINavigationControllerDe
         self.isImageSelected = true
         
         dismiss(animated: true, completion: nil)
-        
-        
     }
 }
-

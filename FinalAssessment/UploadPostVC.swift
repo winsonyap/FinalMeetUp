@@ -18,13 +18,10 @@ class UploadPostVC: UIViewController {
     var isImageSelected : Bool = false
 
     @IBOutlet weak var imageView: UIImageView!
-    
     @IBOutlet weak var addImageButton: UIButton!{
         didSet{
             addImageButton.addTarget(self, action: #selector(tapAddImageButton), for: .touchUpInside)
-            
         }
-        
     }
     
     @IBOutlet weak var titleTextField: UITextField!
@@ -35,16 +32,16 @@ class UploadPostVC: UIViewController {
     @IBOutlet weak var uploadButton: UIButton!{
         didSet{
             uploadButton.addTarget(self, action: #selector(uploadDataButtonTapped), for: .touchUpInside)
-            
         }
-        
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        initUploadView()
         
-       
+        self.navigationItem.title = "Creates New Event"
     }
+    
     func uploadDataButtonTapped()  {
         //create upload details to firebase
         guard
@@ -55,6 +52,29 @@ class UploadPostVC: UIViewController {
             let category = categoryTextField.text
             else {return}
         
+        if title == "" {
+            self.warningAlert(warningMessage: "Title Required")
+            
+            
+        } else if description == "" {
+            self.warningAlert(warningMessage: "Description Required")
+            
+            
+        } else if time == "" {
+            self.warningAlert(warningMessage: "Time Required")
+            
+        } else if location == "" {
+            self.warningAlert(warningMessage: "Location Required")
+            
+            
+        } else if category == "" {
+            self.warningAlert(warningMessage: "Category Required")
+            
+        } else if isImageSelected == false {
+            self.warningAlert(warningMessage: "Event Image Required, Click on ( + ) to insert image®")
+            
+        } else {
+
         guard let uid = Auth.auth().currentUser?.uid else {return}
     
         let storageRef = Storage.storage().reference()
@@ -63,6 +83,7 @@ class UploadPostVC: UIViewController {
         metadata.contentType = "image/jpg"
         
         guard let data = UIImageJPEGRepresentation(imageView.image!, 0.8) else {
+            
             dismiss(animated: true, completion: nil)
             return
         }
@@ -82,7 +103,6 @@ class UploadPostVC: UIViewController {
                     return
                 }
                 
-
                 let now = Date()
                 let param : [String : Any] = ["title" : title,"description" : description,"time" : time, "location" : location,"category" : category, "imageURL" : imageURL, "userID" : uid, "timestamp": now.timeIntervalSince1970]
         
@@ -90,17 +110,19 @@ class UploadPostVC: UIViewController {
             ref.childByAutoId().setValue(param)
         
         self.setupSpinner()
-        
         self.presentPostVC()
     }
-        }
     }
+    }
+    }
+    
     func presentPostVC() {
         let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         let postVC = mainStoryboard.instantiateViewController(withIdentifier: "TadBarController")
         
         self.present(postVC, animated: true, completion: nil)
     }
+    
     func setupSpinner(){
         // Position Activity Indicator in the center of the main view
         myActivityIndicator.center = view.center
@@ -109,13 +131,27 @@ class UploadPostVC: UIViewController {
         myActivityIndicator.hidesWhenStopped = true
         
         view.addSubview(myActivityIndicator)
-
     }
+    
     func tapAddImageButton()  {
         
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
         present(pickerController, animated: true, completion: nil)
+    }
+    
+    func warningAlert(warningMessage: String){
+        let alertController = UIAlertController(title: "Error", message: warningMessage, preferredStyle: .alert)
+        let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+        alertController.addAction(ok)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func initUploadView() {
+        UIDesign().setGradientBackgroundColor(view: self.view, firstColor: UIColor.cyan, secondColor: UIColor.red)
+        UIDesign().setButtonDesign(button: uploadButton, color: UIColor.red)
+        UIDesign().setButtonDesign(button: addImageButton, color: UIColor.red)
     }
 }
 
@@ -127,21 +163,10 @@ extension UploadPostVC :  UIImagePickerControllerDelegate, UINavigationControlle
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        
         let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
-        
         self.imageView.image = selectedImage
-        
         self.isImageSelected = true
-        
+    
         dismiss(animated: true, completion: nil)
-        
-        
     }
 }
-
-
-
-
-
-

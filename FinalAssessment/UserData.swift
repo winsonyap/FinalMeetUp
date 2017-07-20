@@ -16,9 +16,8 @@ class UserData {
     var uid : String
     var name: String
     var userID: String
-    var timeStamp: Date
     var email: String
-    var profileImageURL : String?
+    var profileImageURL : URL?
     
     init?(snapshot: DataSnapshot){
         
@@ -27,7 +26,6 @@ class UserData {
         guard
             let dictionary = snapshot.value as? [String: Any],
             let validUser = dictionary["userID"] as? String,
-            let validTimestamp = dictionary["timestamp"] as? Double,
             let validName = dictionary["username"] as? String,
             let validEmail = dictionary["email"]as? String,
             let validProfileImage = dictionary["profileImageURL"]as? String
@@ -36,10 +34,9 @@ class UserData {
             else { return nil }
         
         self.userID = validUser
-        self.timeStamp = Date(timeIntervalSince1970: validTimestamp)
         self.name = validName
         self.email = validEmail
-        self.profileImageURL = validProfileImage
+        self.profileImageURL = URL(string: validProfileImage)
         
         }
     }

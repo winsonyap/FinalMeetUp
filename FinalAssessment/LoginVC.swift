@@ -19,7 +19,6 @@ class LoginVC: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!{
         didSet {
             emailTextField.addTarget(self, action: #selector(textFieldChanges), for: .editingChanged)
-            
         }
     }
     
@@ -28,7 +27,6 @@ class LoginVC: UIViewController {
         didSet{
             passwordTextField.isSecureTextEntry = true
             passwordTextField.addTarget(self, action: #selector(textFieldChanges), for: .editingChanged)
-            
         }
     }
     
@@ -36,9 +34,7 @@ class LoginVC: UIViewController {
         
         didSet{
             loginButton.addTarget(self, action: #selector(whenLoginButtonTapped(_:)), for: .touchUpInside)
-            
         }
-        
     }
     
     @IBOutlet weak var registerButton: UIButton!{
@@ -46,6 +42,7 @@ class LoginVC: UIViewController {
             registerButton.addTarget(self, action: #selector(whenRegisterButtonTapped(_:)), for: .touchUpInside)
         }
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -58,7 +55,6 @@ class LoginVC: UIViewController {
         let registerVC = mainStoryboard.instantiateViewController(withIdentifier: "RegisterVC")
         
         self.navigationController?.pushViewController(registerVC, animated: true)
-        
     }
     
     //pop out an alert controller
@@ -82,10 +78,9 @@ class LoginVC: UIViewController {
     }
     
     func initLoginView() {
-        // design login view optional
-        UIDesign().setGradientBackgroundColor(view: self.view, firstColor: UIColor.blue, secondColor: UIColor.blue)
-        
-        UIDesign().setLoginLabel(lable: LoginLabel)
+        // design login view optional(uidesign)
+        UIDesign().setGradientBackgroundColor(view: self.view, firstColor: UIColor.red, secondColor: UIColor.cyan)
+        UIDesign().setLabel(lable: LoginLabel)
         UIDesign().setButtonDesign(button: loginButton, color: UIColor.purple)
         UIDesign().setButtonDesign(button: registerButton, color: UIColor.purple)
         //to disable button when no input
@@ -97,10 +92,8 @@ class LoginVC: UIViewController {
         guard
             let email = emailTextField.text,
             let password = passwordTextField.text
-            else{
-                
-                return
-        }
+            else{return}
+        
         Auth.auth().signIn(withEmail : email, password : password ) {(user, error) in
             
             if let validError = error {
@@ -108,18 +101,13 @@ class LoginVC: UIViewController {
                 print("login error\(validError)")
                 
                 self.warningAlert(withTitle: "Login Error", withMessage: "Email and Password not match")
-                
                 return
             }
-            
             print(" User Exist \(user?.uid ?? "")")
-            
             let mainStoryboard = UIStoryboard (name: "Main", bundle: Bundle.main)
             let mainViewController = mainStoryboard.instantiateViewController(withIdentifier: "NavigationController2")
             
             self.present(mainViewController, animated: true, completion: nil)
-            
         }
     }
-    
 }

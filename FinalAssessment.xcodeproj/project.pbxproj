@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AF40F0DDF7FF82865DF388EF /* Pods_FinalAssessment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0091810715E2EC045152C55 /* Pods_FinalAssessment.framework */; };
+		D91AF38D1F20A51300C6893F /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91AF38C1F20A51300C6893F /* SearchVC.swift */; };
 		D92BF37A1F1C6B030084BD26 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92BF3791F1C6B030084BD26 /* AppDelegate.swift */; };
 		D92BF37F1F1C6B030084BD26 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D92BF37D1F1C6B030084BD26 /* Main.storyboard */; };
 		D92BF3811F1C6B030084BD26 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D92BF3801F1C6B030084BD26 /* Assets.xcassets */; };
@@ -29,6 +30,7 @@
 /* Begin PBXFileReference section */
 		4265DEF2DD5D27FF75B3F656 /* Pods-FinalAssessment.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FinalAssessment.release.xcconfig"; path = "Pods/Target Support Files/Pods-FinalAssessment/Pods-FinalAssessment.release.xcconfig"; sourceTree = "<group>"; };
 		C0091810715E2EC045152C55 /* Pods_FinalAssessment.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FinalAssessment.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D91AF38C1F20A51300C6893F /* SearchVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchVC.swift; sourceTree = "<group>"; };
 		D92BF3761F1C6B030084BD26 /* FinalAssessment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinalAssessment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D92BF3791F1C6B030084BD26 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D92BF37E1F1C6B030084BD26 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 		D96B32201F1DB5EF00E77EB9 /* search VC */ = {
 			isa = PBXGroup;
 			children = (
+				D91AF38C1F20A51300C6893F /* SearchVC.swift */,
 			);
 			name = "search VC";
 			sourceTree = "<group>";
@@ -306,6 +309,7 @@
 				D92BF3A61F1C7D720084BD26 /* Post.swift in Sources */,
 				D92BF39B1F1C74FF0084BD26 /* PostsTableViewCell.swift in Sources */,
 				D92BF38E1F1C6E120084BD26 /* LoginVC.swift in Sources */,
+				D91AF38D1F20A51300C6893F /* SearchVC.swift in Sources */,
 				D96B321F1F1DB5D800E77EB9 /* EditProfileVC.swift in Sources */,
 				D96B321A1F1CB35000E77EB9 /* DetailsVC.swift in Sources */,
 			);
