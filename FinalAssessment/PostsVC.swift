@@ -15,11 +15,11 @@ import SDWebImage
 
 
 class PostsVC: UIViewController {
-
+    
     static let storyboardIdentifier = "PostsVC"
     
     var posts : [Post] = []
-        
+    
     @IBOutlet weak var tableView: UITableView!{
         didSet{
             //cell set data, delegate (registered)
@@ -36,7 +36,7 @@ class PostsVC: UIViewController {
         }
     }
     
-       override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         fetchData()
     }
@@ -51,19 +51,19 @@ class PostsVC: UIViewController {
     func fetchData() {
         
         let ref = Database.database().reference()
-            ref.child("posts").observe(.childAdded, with: { (snapshot) in
-                if let data = Post(snapshot: snapshot) {
+        ref.child("posts").observe(.childAdded, with: { (snapshot) in
+            if let data = Post(snapshot: snapshot) {
                 self.posts.append(data)
             }
-                self.posts.sort(by: {$0.timeStamp > $1.timeStamp})
-                self.tableView.reloadData()
-            })
+            //sort post by lastest first
+            self.posts.sort(by: {$0.timeStamp > $1.timeStamp})
+            self.tableView.reloadData()
+        })
     }
     
 }
 
 extension PostsVC : UITableViewDataSource, UITableViewDelegate{
-    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return posts.count

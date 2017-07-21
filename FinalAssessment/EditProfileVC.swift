@@ -20,6 +20,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate{
     var getEmail : String?
     var getProfileImage : UIImage?
     
+    @IBOutlet weak var newUsernameLabel: UILabel!
     @IBOutlet weak var updateImageView: UIImageView!
     @IBOutlet weak var addImageButton: UIButton!{
         didSet{
@@ -41,24 +42,39 @@ class EditProfileVC: UIViewController, UITextFieldDelegate{
         super.viewDidLoad()
         self.usernameUpdate.text = getUsername
         self.updateImageView.image = getProfileImage
-
-        initEditView()
         self.navigationItem.title = "Update Profile"
+        initEditView()
+        keyboardAddObserver()
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
+    func keyboardAddObserver()  {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name:NSNotification.Name.UIKeyboardWillShow, object: nil);
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name:NSNotification.Name.UIKeyboardWillHide, object: nil);
+    }
+    func keyboardWillShow(notification: NSNotification) {
+        self.view.frame.origin.y = -210 // Move view 210 points upward
+    }
+    func keyboardWillHide(notification: NSNotification) {
+        self.view.frame.origin.y = 0 // Move view to original position
+    }
+
     func didTappedAddImageButton (_ sender: Any){
         
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
         present(pickerController, animated: true, completion: nil)
-        
     }
+    
     func didTappedUploadButton(_ sender : Any){
         
         guard
             let uid = Auth.auth().currentUser?.uid,
             let changeUsername = self.usernameUpdate.text
-        
+            
             else {return}
         
         if changeUsername == "" {
@@ -66,38 +82,35 @@ class EditProfileVC: UIViewController, UITextFieldDelegate{
             
         } else if isImageSelected == false {
             self.warningAlert(warningMessage: "Profile Photo Required")
-    
-        } else {
             
-        
-        let storageRef = Storage.storage().reference()
-        
-        let metadata = StorageMetadata()
-        metadata.contentType = "image/jpg"
-        
-        let data = UIImageJPEGRepresentation(self.updateImageView.image!, 0.8)
-        
-        storageRef.child("\(uid).jpg").putData(data!, metadata: metadata) { (newMeta, error) in
-            if (error != nil) {
-                // if error
-                print(error!)
-            } else {
-                
-                if let foundError = error {
-                    print(foundError.localizedDescription)
-                    return
-                }
-                
-                guard let imageURL = newMeta?.downloadURLs?.first?.absoluteString else {
-                    return
-                }
-                
-                let param : [String : Any] = ["profileImageURL": imageURL,
-                                              "username": changeUsername]
-                
-                let ref = Database.database().reference().child("users")
-                ref.child(uid).updateChildValues(param)
-            }}
+        } else {
+            let storageRef = Storage.storage().reference()
+            
+            let metadata = StorageMetadata()
+            metadata.contentType = "image/jpg"
+            
+            let data = UIImageJPEGRepresentation(self.updateImageView.image!, 0.8)
+            
+            storageRef.child("\(uid).jpg").putData(data!, metadata: metadata) { (newMeta, error) in
+                if (error != nil) {
+                    // if error
+                    print(error!)
+                } else {
+                    
+                    if let foundError = error {
+                        print(foundError.localizedDescription)
+                        return
+                    }
+                    
+                    guard let imageURL = newMeta?.downloadURLs?.first?.absoluteString else {
+                        return
+                    }
+                    let param : [String : Any] = ["profileImageURL": imageURL,
+                                                  "username": changeUsername]
+                    
+                    let ref = Database.database().reference().child("users")
+                    ref.child(uid).updateChildValues(param)
+                }}
         }
         self.toProfileVC()
     }
@@ -107,12 +120,12 @@ class EditProfileVC: UIViewController, UITextFieldDelegate{
         let mainVC = storyboard.instantiateViewController(withIdentifier: "TadBarController")
         self.present(mainVC, animated: true, completion: nil)
     }
-
     
     func initEditView() {
         UIDesign().setGradientBackgroundColor(view: self.view, firstColor: UIColor.cyan, secondColor: UIColor.red)
-         UIDesign().setButtonDesign(button: addImageButton, color: UIColor.red)
-         UIDesign().setButtonDesign(button: updateButton, color: UIColor.red)
+        UIDesign().setButtonDesign(button: addImageButton, color: UIColor.red)
+        UIDesign().setButtonDesign(button: updateButton, color: UIColor.red)
+        UIDesign().setLabel(lable: newUsernameLabel)
     }
     
     func warningAlert(warningMessage: String){
@@ -124,14 +137,13 @@ class EditProfileVC: UIViewController, UITextFieldDelegate{
 }
 
 extension EditProfileVC : UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-
+    
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         //cancel button in photo
         dismiss(animated: true, completion: nil)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        
         let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
         self.updateImageView.image = selectedImage
         self.isImageSelected = true

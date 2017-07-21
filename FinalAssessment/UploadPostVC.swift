@@ -8,38 +8,86 @@
 
 import UIKit
 import Firebase
+import MapKit
+import CoreLocation
 
-class UploadPostVC: UIViewController {
+class UploadPostVC: UIViewController,CLLocationManagerDelegate {
     
     static let storyboardIdentifier = "UploadPostVC"
-    //add activityIndicator
-    let myActivityIndicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
     
     var isImageSelected : Bool = false
-
+    var getLat: Double?
+    var getLong: Double?
+    
+    let pinView = MKPointAnnotation()
+    
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var addImageButton: UIButton!{
         didSet{
             addImageButton.addTarget(self, action: #selector(tapAddImageButton), for: .touchUpInside)
         }
     }
-    
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var descriptionTextField: UITextField!
     @IBOutlet weak var timeTextField: UITextField!
-    @IBOutlet weak var locationTextField: UITextField!
     @IBOutlet weak var categoryTextField: UITextField!
     @IBOutlet weak var uploadButton: UIButton!{
         didSet{
             uploadButton.addTarget(self, action: #selector(uploadDataButtonTapped), for: .touchUpInside)
         }
     }
+    @IBOutlet weak var mapView: MKMapView!
+    
+    let manager = CLLocationManager()
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        //[0] = current location
+        let location = locations[0]
+        //span-zoom
+        let span:MKCoordinateSpan = MKCoordinateSpanMake(0.01, 0.01)
+        let myLocation:CLLocationCoordinate2D = CLLocationCoordinate2DMake(location.coordinate.latitude, location.coordinate.longitude)
+        
+        let region:MKCoordinateRegion = MKCoordinateRegionMake(myLocation, span)
+        mapView.setRegion(region, animated: true)
+        pinView.coordinate = myLocation
+        pinView.title = "I M Here!"
+        
+        //set double? 
+        getLat = myLocation.latitude
+        getLong = myLocation.longitude
+        
+        mapView.addAnnotation(pinView)
+        mapView.setRegion(region, animated: true)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        mapFunc()
         initUploadView()
-        
-        self.navigationItem.title = "Creates New Event"
+        keyboardAddObserver()
+        self.navigationItem.title = "Creates Live Event"
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
+    func keyboardAddObserver()  {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name:NSNotification.Name.UIKeyboardWillShow, object: nil);
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name:NSNotification.Name.UIKeyboardWillHide, object: nil);
+    }
+    func keyboardWillShow(notification: NSNotification) {
+        self.view.frame.origin.y = -210 // Move view 210 points upward
+    }
+    func keyboardWillHide(notification: NSNotification) {
+        self.view.frame.origin.y = 0 // Move view to original position
+    }
+
+    func mapFunc()  {
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.requestWhenInUseAuthorization()
+        manager.startUpdatingLocation()
     }
     
     func uploadDataButtonTapped()  {
@@ -48,8 +96,8 @@ class UploadPostVC: UIViewController {
             let title = titleTextField.text,
             let description = descriptionTextField.text,
             let time = timeTextField.text,
-            let location = locationTextField.text,
             let category = categoryTextField.text
+            
             else {return}
         
         if title == "" {
@@ -63,10 +111,6 @@ class UploadPostVC: UIViewController {
         } else if time == "" {
             self.warningAlert(warningMessage: "Time Required")
             
-        } else if location == "" {
-            self.warningAlert(warningMessage: "Location Required")
-            
-            
         } else if category == "" {
             self.warningAlert(warningMessage: "Category Required")
             
@@ -74,46 +118,45 @@ class UploadPostVC: UIViewController {
             self.warningAlert(warningMessage: "Event Image Required, Click on ( + ) to insert image®")
             
         } else {
-
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-    
-        let storageRef = Storage.storage().reference()
-        
-        let metadata = StorageMetadata()
-        metadata.contentType = "image/jpg"
-        
-        guard let data = UIImageJPEGRepresentation(imageView.image!, 0.8) else {
             
-            dismiss(animated: true, completion: nil)
-            return
+            guard let uid = Auth.auth().currentUser?.uid else {return}
+            
+            let storageRef = Storage.storage().reference()
+            
+            let metadata = StorageMetadata()
+            metadata.contentType = "image/jpg"
+            
+            guard let data = UIImageJPEGRepresentation(imageView.image!, 0.8) else {
+                
+                dismiss(animated: true, completion: nil)
+                return
+            }
+            
+            storageRef.child("\(uid).jpg").putData(data, metadata: metadata) { (newMeta, error) in
+                if (error != nil) {
+                    
+                    print(error!)
+                } else {
+                    
+                    if let foundError = error {
+                        print(foundError.localizedDescription)
+                        return
+                    }
+                    
+                    guard let imageURL = newMeta?.downloadURLs?.first?.absoluteString else {
+                        return
+                    }
+                    
+                    let now = Date()
+                    let param : [String : Any] = ["title" : title,"description" : description,"time" : time, "category" : category, "imageURL" : imageURL, "userID" : uid, "timestamp": now.timeIntervalSince1970, "Lat": self.getLat ?? "", "Long": self.getLong ?? ""]
+                    
+                    let ref = Database.database().reference().child("posts")
+                    ref.childByAutoId().setValue(param)
+                    
+                    self.presentPostVC()
+                }
+            }
         }
-        
-        storageRef.child("\(uid).jpg").putData(data, metadata: metadata) { (newMeta, error) in
-            if (error != nil) {
-                
-                print(error!)
-            } else {
-                
-                if let foundError = error {
-                    print(foundError.localizedDescription)
-                    return
-                }
-                
-                guard let imageURL = newMeta?.downloadURLs?.first?.absoluteString else {
-                    return
-                }
-                
-                let now = Date()
-                let param : [String : Any] = ["title" : title,"description" : description,"time" : time, "location" : location,"category" : category, "imageURL" : imageURL, "userID" : uid, "timestamp": now.timeIntervalSince1970]
-        
-        let ref = Database.database().reference().child("posts")
-            ref.childByAutoId().setValue(param)
-        
-        self.setupSpinner()
-        self.presentPostVC()
-    }
-    }
-    }
     }
     
     func presentPostVC() {
@@ -121,16 +164,6 @@ class UploadPostVC: UIViewController {
         let postVC = mainStoryboard.instantiateViewController(withIdentifier: "TadBarController")
         
         self.present(postVC, animated: true, completion: nil)
-    }
-    
-    func setupSpinner(){
-        // Position Activity Indicator in the center of the main view
-        myActivityIndicator.center = view.center
-        
-        // If needed, you can prevent Acivity Indicator from hiding when stopAnimating() is called
-        myActivityIndicator.hidesWhenStopped = true
-        
-        view.addSubview(myActivityIndicator)
     }
     
     func tapAddImageButton()  {
@@ -166,7 +199,7 @@ extension UploadPostVC :  UIImagePickerControllerDelegate, UINavigationControlle
         let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
         self.imageView.image = selectedImage
         self.isImageSelected = true
-    
+        
         dismiss(animated: true, completion: nil)
     }
 }

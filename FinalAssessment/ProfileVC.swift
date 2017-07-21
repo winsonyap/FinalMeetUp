@@ -9,13 +9,28 @@
 import UIKit
 import Firebase
 import SDWebImage
+import CoreLocation
+import MapKit
 
-class ProfileVC: UIViewController {
-
+class ProfileVC: UIViewController,CLLocationManagerDelegate {
+    
     static let storyboardIdentifier = "ProfileVC"
-    //var userData:[UserData] = []
-    var profileImg: [UserData] = []
+    
     var currentUserID : String?
+    
+    @IBOutlet weak var mapView: MKMapView!
+    let manager = CLLocationManager()
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        let location = locations[0]
+        let span:MKCoordinateSpan = MKCoordinateSpanMake(0.01, 0.01)
+        let myLocation:CLLocationCoordinate2D = CLLocationCoordinate2DMake(location.coordinate.latitude, location.coordinate.longitude)
+        let region:MKCoordinateRegion = MKCoordinateRegionMake(myLocation, span)
+        mapView.setRegion(region, animated: true)
+        //live location
+        self.mapView.showsUserLocation = true
+    }
     
     @IBOutlet weak var logoutButton: UIBarButtonItem!{
         didSet{
@@ -39,9 +54,16 @@ class ProfileVC: UIViewController {
         super.viewDidLoad()
         fetchData()
         initProfileView()
-      //  editButton.isEnabled = false
+        mapFunc()
     }
-
+    
+    func mapFunc()  {
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.requestWhenInUseAuthorization()
+        manager.startUpdatingLocation()
+    }
+    
     func logoutButtonTapped()  {
         let firebaseAuth = Auth.auth()
         do {
@@ -72,16 +94,14 @@ class ProfileVC: UIViewController {
             }
             self.usernameLabel.text = username
             self.userEmailLabel.text = email
-            self.profileImg = []
         })
     }
     
     func initProfileView() {
-       
+        
         UIDesign().setGradientBackgroundColor(view: self.view, firstColor: UIColor.cyan, secondColor: UIColor.red)
         UIDesign().setLabel(lable: usernameLabel)
         UIDesign().setLabel(lable: userEmailLabel)
     }
-
 }
 

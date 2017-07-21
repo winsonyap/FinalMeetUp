@@ -12,7 +12,7 @@ import UIKit
 class UIDesign {
     
     private var gradientLayer: CAGradientLayer?
-    
+    //ui for background
     func setGradientBackgroundColor(view: UIView, firstColor: UIColor, secondColor: UIColor) {
         gradientLayer = CAGradientLayer()
         gradientLayer?.frame = view.bounds
@@ -20,13 +20,13 @@ class UIDesign {
         gradientLayer?.opacity = 0.7
         view.layer.insertSublayer(gradientLayer!, at: 0)
     }
-    
+    //ui for label
     func setLabel(lable : UILabel) {
         lable.textColor = UIColor.white
         lable.shadowColor = UIColor.gray
         lable.shadowOffset = CGSize(width: 2, height: 2)
     }
-    
+    //ui for button
     func setButtonDesign(button : UIButton, color : UIColor) {
         button.layer.cornerRadius = 15.0;
         button.layer.borderColor = color.cgColor
